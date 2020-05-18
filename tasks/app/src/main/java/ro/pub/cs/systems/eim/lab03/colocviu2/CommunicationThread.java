@@ -76,50 +76,25 @@ public class CommunicationThread extends Thread {
                 data = data;
             } else {
 
-                Log.i(Constants.TAG, "[COMMUNICATION THREAD] Getting the information from the webservice...");
-                HttpClient httpClient = new DefaultHttpClient();
-                String pageSourceCode = "";
-                HttpGet httpGet = new HttpGet(Constants.WEB_SERVICE_ADDRESS);
-                HttpResponse httpGetResponse = httpClient.execute(httpGet);
-                HttpEntity httpGetEntity = httpGetResponse.getEntity();
-                if (httpGetEntity != null) {
-                    pageSourceCode = EntityUtils.toString(httpGetEntity);
+                try {
+                    serverThread.sync();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-                if (pageSourceCode == null) {
-                    Log.e(Constants.TAG, "[COMMUNICATION THREAD] Error getting the information from the webservice!");
-                    return;
-                } else
-                    Log.i(Constants.TAG, pageSourceCode );
-
-                // Updated for openweather API
-                {
-                    JSONObject content = new JSONObject(pageSourceCode);
-
-                    JSONObject bpi = content.getJSONObject("bpi");
-
-                    Double usd_rate = bpi.getJSONObject("USD").getDouble("rate_float");
-                    Double eur_rate = bpi.getJSONObject("EUR").getDouble("rate_float");
-
-                    serverThread.setData(eur_rate, usd_rate);
-                    if(currency.equals("EUR"))
+                if(currency.equals("EUR"))
                         data = serverThread.getEur();
                     else
                         data = serverThread.getUsd();
-//                    Log.e(Constants.TAG, "[COMMUNICATION THREAD] An exception has occurred: " + ioException.getMessage());
                 }
-            }
             printWriter.println(data);
             printWriter.flush();
         } catch (IOException ioException) {
             Log.e(Constants.TAG, "[COMMUNICATION THREAD] An exception has occurred: " + ioException.getMessage());
             if (Constants.DEBUG) {
                 ioException.printStackTrace();
-            }
-        } catch (JSONException jsonException) {
-            Log.e(Constants.TAG, "[COMMUNICATION THREAD] An exception has occurred: " + jsonException.getMessage());
-            if (Constants.DEBUG) {
-                jsonException.printStackTrace();
             }
         } finally {
             if (socket != null) {

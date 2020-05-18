@@ -2,12 +2,20 @@ package ro.pub.cs.systems.eim.lab03.colocviu2;
 
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.client.*;
+import cz.msebera.android.httpclient.client.methods.HttpGet;
+import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
+import cz.msebera.android.httpclient.util.EntityUtils;
 
 public class ServerThread extends Thread {
 
@@ -37,6 +45,33 @@ public class ServerThread extends Thread {
 
     public int getPort() {
         return port;
+    }
+
+    public void sync() throws JSONException, IOException {
+        Log.i(Constants.TAG, "[COMMUNICATION THREAD] Getting the information from the webservice...");
+        HttpClient httpClient = new DefaultHttpClient();
+        String pageSourceCode = "";
+        HttpGet httpGet = new HttpGet(Constants.WEB_SERVICE_ADDRESS);
+        HttpResponse httpGetResponse = httpClient.execute(httpGet);
+        HttpEntity httpGetEntity = httpGetResponse.getEntity();
+        if (httpGetEntity != null) {
+            pageSourceCode = EntityUtils.toString(httpGetEntity);
+        }
+
+        if (pageSourceCode == null) {
+            Log.e(Constants.TAG, "[COMMUNICATION THREAD] Error getting the information from the webservice!");
+            return;
+        } else
+            Log.i(Constants.TAG, pageSourceCode);
+
+            JSONObject content = new JSONObject(pageSourceCode);
+
+            JSONObject bpi = content.getJSONObject("bpi");
+
+            Double usd_rate = bpi.getJSONObject("USD").getDouble("rate_float");
+            Double eur_rate = bpi.getJSONObject("EUR").getDouble("rate_float");
+
+            setData(eur_rate, usd_rate);
     }
 
     public void setServerSocket(ServerSocket serverSocket) {

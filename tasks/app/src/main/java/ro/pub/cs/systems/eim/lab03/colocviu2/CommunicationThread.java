@@ -89,7 +89,8 @@ public class CommunicationThread extends Thread {
                     else
                         data = serverThread.getUsd();
                 }
-            printWriter.println(data);
+                String updated = serverThread.getUpdatedAt();
+            printWriter.println(data + " at " + updated);
             printWriter.flush();
         } catch (IOException ioException) {
             Log.e(Constants.TAG, "[COMMUNICATION THREAD] An exception has occurred: " + ioException.getMessage());

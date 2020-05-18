@@ -24,6 +24,7 @@ public class ServerThread extends Thread {
 
     private Double eur = null;
     private Double usd = null;
+    private String updatedAt = "";
 
     public ServerThread(int port) {
         this.port = port;
@@ -68,10 +69,15 @@ public class ServerThread extends Thread {
 
             JSONObject bpi = content.getJSONObject("bpi");
 
+            updatedAt =  content.getJSONObject("time").getString("updated");
             Double usd_rate = bpi.getJSONObject("USD").getDouble("rate_float");
             Double eur_rate = bpi.getJSONObject("EUR").getDouble("rate_float");
 
             setData(eur_rate, usd_rate);
+    }
+
+    public String getUpdatedAt(){
+        return updatedAt;
     }
 
     public void setServerSocket(ServerSocket serverSocket) {
